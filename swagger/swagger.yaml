@@ -1,0 +1,92 @@
+openapi: 3.0.2
+
+info:
+  title: Todo API
+  description: <b>Todoを管理するAPI</b>
+  version: 1.0.0
+
+servers: 
+ - url: http://localhost:8080
+tags:
+ - name: auth
+   description: 認証API
+ - name: user
+   description: ユーザー情報API
+ - name: todo
+   description: タスク情報API
+ - name: search
+   description: タスク検索API
+paths: 
+  /user/create:
+    post:
+      tags:
+        - user
+      summary: ユーザ情報作成API
+      description: |
+        ユーザ情報を作成します。<br>
+        ユーザの名前情報をリクエストで受け取り、ユーザIDと認証用のトークンを生成しデータベースへ保存します。<br>
+        tokenは以降の他のAPIコール時にヘッダに設定をします。
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /user/get:
+    get:
+      tags:
+        - user
+      summary: ユーザ情報取得API
+      description: |
+        ユーザ情報を取得します。
+        「ユーザの認証と特定」の処理はリクエストヘッダの`x-token`を読み取ってデータベースに照会をします。
+      security:
+        - authToken: []
+      responses:
+        200:
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGetResponse'
+  /user/update:
+    put:
+      tags:
+        - user
+      summary: ユーザ情報更新API
+      description: |
+        ユーザ情報の更新する
+      security:
+        - Bearer: []
+      requestBody:
+        description: Request Body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: A successful response.
+          content: {}
+      x-codegen-request-body-name: body

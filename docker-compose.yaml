@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+  # api:
+  #   build:
+  #     context: ./
+  #     target: dev
+  #   command: reflex -r '\.go$$' -s -- sh -c 'go run cmd/main.go'
+  #   tty: true
+  #   stdin_open: true
+  #   volumes:
+  #     - ./:/app
+  #   working_dir: /app
+  #   ports:
+  #     - 9000:9000
+  #   networks:
+  #     - app
+  #   depends_on:
+  #     - mysql
+
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    # networks:
+    #   - app
+    environment:
+      MYSQL_ROOT_PASSWORD: 'admin'
+      MYSQL_DATABASE: 'todo'
+      MYSQL_PASSWORD: 'password'
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      # - ./db.init:/docker-entrypoint-init.d
+      - ./db/mysql/init:/docker-entrypoint-initdb.d
+      # - ./db/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./db/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - db-data:/var/lib/mysql
+
+  # swagger-ui:
+  #   container_name: swagger
+  #   image: swaggerapi/swagger-ui
+  #   depends_on:
+  #     - api
+  #   environment:
+  #     - SWAGGER_URL=./swagger.yaml
+  #     - SWAGGER_JSON=/swagger/swagger.yaml
+  #   ports:
+  #     - 8002:8080
+  #   volumes:
+  #     - ./swagger/:/swagger
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: "admin"
+    ports:
+      - "127.0.0.1:4000:80"
+    links:
+      - mysql
+
+volumes:
+  db-data:
+    driver: local
+# networks:
+#   app:
+#     driver: bridge
