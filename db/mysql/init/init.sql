@@ -9,21 +9,18 @@ USE `todo`;
 SET CHARSET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `user` (
-    `user_id` VARCHAR(64) NOT NULL COMMENT 'ユーザーID',
+    `id` VARCHAR(64) NOT NULL COMMENT 'ユーザーID',
+    `name` VARCHAR(128) NOT NULL COMMENT 'ユーザーネーム',
     `password` VARCHAR(128) NOT NULL COMMENT 'パスワード',
-    `token` VARCHAR(128) NOT NULL COMMENT '認証用トークン',
-    `user_name` VARCHAR(128) NOT NULL COMMENT 'ユーザーネーム',
     `mail` VARCHAR(32) NOT NULL COMMENT 'メールアドレス',
-    `work` VARCHAR(32) NOT NULL COMMENT '職業',
     `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '作成時',
     `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新時',
-    PRIMARY KEY (`user_id`),
-    INDEX `idx_auth_token` (`user_id` ASC)
+    PRIMARY KEY (`user_id`)
 );
 
 CREATE TABLE if NOT EXISTS `tasks` (
-    `id` VARCHAR(64) NOT NULL COMMENT 'ユーザーID',
-    `todo_id` VARCHAR(64) NOT NULL COMMENT 'タスクID',
+    `id` VARCHAR(64) NOT NULL COMMENT 'タスクID',
+    `user_id` VARCHAR(64) NOT NULL COMMENT 'ユーザーID',
     `title` VARCHAR(64) NOT NULL COMMENT 'タイトル',
     `description` VARCHAR(512) NOT NULL COMMENT 'タスク概要',
     `is_complete` TINYINT(1) NOT NULL COMMENT 'タスク完了判定',
@@ -32,9 +29,9 @@ CREATE TABLE if NOT EXISTS `tasks` (
     PRIMARY KEY (`todo_id`)
 );
 
-INSERT INTO `user` (`user_id`,`password`,`token`,`user_name`,`mail`,`work`) VALUES ("1","password","token","test_name","test_email","test_work");
-INSERT INTO `user` (`user_id`,`password`,`token`,`user_name`,`mail`,`work`) VALUES ("2","password","token","test_name","test_email","test_work");
+INSERT INTO `user` (`id`,`name`,`password`,`mail`) VALUES ("1","test1","test1","testpass1","testmail1");
+INSERT INTO `user` (`id`,`name`,`password`,`mail`) VALUES ("2","test2","test2","testpass2","testmail2");
 
-INSERT INTO `tasks` (`id`,`todo_id`,`title`,`description`,`is_complete`) VALUES ("1","1","test_tiele","test_description",false);
-INSERT INTO `tasks` (`id`,`todo_id`,`title`,`description`,`is_complete`) VALUES ("1","2","test_tiele","test_description",false);
-INSERT INTO `tasks` (`id`,`todo_id`,`title`,`description`,`is_complete`) VALUES ("2","1","test_tiele","test_description",false);
+INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("1","1","test_tiele1","test_description1",false);
+INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("1","2","test_tiele2","test_description2",false);
+INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("2","1","test_tiele3","test_description3",false);
