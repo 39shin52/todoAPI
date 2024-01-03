@@ -11,11 +11,10 @@ import (
 
 type userRepositoryImpl struct {
 	db *sql.DB
-	t  transaction.Transaction
 }
 
-func NewUserRepository(db *sql.DB, t transaction.Transaction) repository.UserRepository {
-	return &userRepositoryImpl{db: db, t: t}
+func NewUserRepository(db *sql.DB, t transaction.TxAdmin) repository.UserRepository {
+	return &userRepositoryImpl{db: db}
 }
 
 func (ur *userRepositoryImpl) SelectUser(name string) (*entity.User, error) {
@@ -52,44 +51,29 @@ func (ur *userRepositoryImpl) SelectUsers() ([]entity.User, error) {
 	return users, nil
 }
 func (ur *userRepositoryImpl) DeleteUser(ctx context.Context, name string) error {
-	_, err := ur.t.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) (interface{}, error) {
-		_, err := tx.Exec("delete from user where user_name=?", name)
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
-	})
-	if err != nil {
+	req := "delete from user where user_name=?"
+
+	if _, err := ur.db.ExecContext(ctx, req, name); err != nil {
 		return err
 	}
 
 	return nil
 }
+
 func (ur *userRepositoryImpl) UpdateUser(ctx context.Context, user entity.User) error {
-	_, err := ur.t.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) (interface{}, error) {
-		_, err := tx.Exec("update user set user_name=?, email=?, work=?", user.UserName, user.Mail, user.Work)
-		if err != nil {
-			return nil, err
-		}
+	req := "update user set user_name=?, email=?, work=?"
 
-		return nil, nil
-	})
-	if err != nil {
+	if _, err := ur.db.ExecContext(ctx, req, user.UserName, user.Mail, user.Work); err != nil {
 		return err
 	}
 
 	return nil
 }
-func (ur *userRepositoryImpl) InsertUser(ctx context.Context, user entity.User) error {
-	_, err := ur.t.Transaction(ctx, func(ctx context.Context, tx *sql.Tx) (interface{}, error) {
-		_, err := tx.Exec("insert into user (user_id,password,token,user_name,mail,work) values (?,?,?,?,?,?)", user.ID, user.Password, user.Token, user.UserName, user.Mail, user.Work)
-		if err != nil {
-			return nil, err
-		}
 
-		return nil, nil
-	})
-	if err != nil {
+func (ur *userRepositoryImpl) InsertUser(ctx context.Context, user entity.User) error {
+	req := "insert into user (user_id,password,token,user_name,mail,work) values (?,?,?,?,?,?)"
+
+	if _, err := ur.db.ExecContext(ctx, req, user.ID, user.Password, user.Token, user.UserName, user.Mail, user.Work); err != nil {
 		return err
 	}
 

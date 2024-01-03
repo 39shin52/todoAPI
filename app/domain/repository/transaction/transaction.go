@@ -3,21 +3,22 @@ package transaction
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 )
 
-type Transaction struct {
+type TxAdmin struct {
 	db *sql.DB
 }
 
-func NewTransaction(db *sql.DB) *Transaction {
-	return &Transaction{db: db}
+func NewTxRepository(db *sql.DB) *TxAdmin {
+	return &TxAdmin{db: db}
 }
 
-func (t *Transaction) Transaction(ctx context.Context, f func(ctx context.Context, tx *sql.Tx) (interface{}, error)) (interface{}, error) {
+func (t *TxAdmin) Transaction(ctx context.Context, f func(ctx context.Context) error) error {
 	tx, err := t.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer func() {
 		if p := recover(); p != nil {
@@ -41,10 +42,9 @@ func (t *Transaction) Transaction(ctx context.Context, f func(ctx context.Contex
 		}
 	}()
 
-	data, err := f(ctx, tx)
-	if err != nil {
-		return nil, err
+	if err := f(ctx); err != nil {
+		return fmt.Errorf("transaction query failed: %w", err)
 	}
 
-	return data, nil
+	return nil
 }
