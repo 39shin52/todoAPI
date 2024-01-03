@@ -26,4 +26,5 @@ func (s *Server) Init() error {
 func (s *Server) Route() {
 	// 依存性注入
 	// dig使う？
+
 }
