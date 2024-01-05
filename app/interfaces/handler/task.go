@@ -10,10 +10,10 @@ import (
 )
 
 type TaskHandler struct {
-	taskUsecase usecase.TaskUsecase
+	taskUsecase *usecase.TaskUsecase
 }
 
-func NewTaskHandler(taskUsecase usecase.TaskUsecase) *TaskHandler {
+func NewTaskHandler(taskUsecase *usecase.TaskUsecase) *TaskHandler {
 	return &TaskHandler{taskUsecase: taskUsecase}
 }
 
@@ -44,4 +44,25 @@ func (th *TaskHandler) GetTasks(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, tasksResponse)
+}
+
+func (th *TaskHandler) GetTask(c *gin.Context) {
+	taskID := c.Param("taskID")
+
+	task, err := th.taskUsecase.ReadTask(taskID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+	}
+
+	taskResponse := response.GetTaskResponse{
+		ID:          task.ID,
+		UserID:      task.UserID,
+		Title:       task.Title,
+		Description: task.Description,
+		IsComplete:  task.IsComplete,
+		Created_at:  task.Created_at,
+		Updated_at:  task.Updated_at,
+	}
+
+	c.JSON(http.StatusOK, taskResponse)
 }

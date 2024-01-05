@@ -11,11 +11,11 @@ import (
 )
 
 type TaskUsecase struct {
-	txAdmin        transaction.TxAdmin
+	txAdmin        *transaction.TxAdmin
 	taskRepository repository.TaskRepository
 }
 
-func NewTaskRepository(taskRepository repository.TaskRepository, txAdmin transaction.TxAdmin) *TaskUsecase {
+func NewTaskUsecase(taskRepository repository.TaskRepository, txAdmin *transaction.TxAdmin) *TaskUsecase {
 	return &TaskUsecase{taskRepository: taskRepository, txAdmin: txAdmin}
 }
 

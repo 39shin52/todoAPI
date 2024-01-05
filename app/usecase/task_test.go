@@ -30,6 +30,7 @@ func TestTaskUsecase_ReadTasks(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
+
 		taskUsecase, mocks := newMocks(ctrl)
 		tasks := []entity.Task{
 			{
@@ -70,6 +71,38 @@ func TestTaskUsecase_ReadTasks(t *testing.T) {
 				Description: "description 2",
 				IsComplete:  "0",
 			},
+		}
+		assert.Equal(t, want, got)
+	})
+}
+
+func TestTaskUsecase_ReadTask(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		taskUsecase, mocks := newMocks(ctrl)
+		task := &entity.Task{
+			ID:          "1",
+			UserID:      "1",
+			Title:       "test title",
+			Description: "test description",
+			IsComplete:  "0",
+		}
+		taskID := "1"
+		mocks.taskMockRespository.EXPECT().SearchTaskByTaskID(taskID).Return(task, nil)
+		got, err := taskUsecase.ReadTask(taskID)
+		require.NoError(t, err)
+		if err != nil {
+			t.Errorf("error message: %v", err)
+		}
+
+		want := &entity.Task{
+			ID:          "1",
+			UserID:      "1",
+			Title:       "test title",
+			Description: "test description",
+			IsComplete:  "0",
 		}
 		assert.Equal(t, want, got)
 	})
