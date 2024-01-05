@@ -6,14 +6,13 @@ import (
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/domain/repository"
-	"github.com/39shin52/todoAPI/app/domain/repository/transaction"
 )
 
 type taskRepositoryImpl struct {
 	db *sql.DB
 }
 
-func NewTaskRepository(db *sql.DB, t transaction.TxAdmin) repository.TaskRepository {
+func NewTaskRepository(db *sql.DB) repository.TaskRepository {
 	return &taskRepositoryImpl{db: db}
 }
 
@@ -48,7 +47,7 @@ func (tr *taskRepositoryImpl) DeleteTask(ctx context.Context, task *entity.Task)
 
 func (tr *taskRepositoryImpl) SearchTaskByTaskID(taskID string) (*entity.Task, error) {
 	task := new(entity.Task)
-	req := `select task_id,title,descripion from tasks where task_id=?`
+	req := `select id, user_id, title, descripion, is_complete, created_at, updated_at from tasks where id=?`
 
 	row := tr.db.QueryRow(req, taskID)
 	if err := row.Scan(&task.UserID, &task.ID, &task.Title, &task.Description, &task.IsComplete); err != nil {
