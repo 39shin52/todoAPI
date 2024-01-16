@@ -53,12 +53,12 @@ func (tr *taskRepositoryImpl) SearchTaskByTaskID(taskID string) (*entity.Task, e
 	err := tr.db.QueryRow(req, taskID).Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.IsComplete, &task.Created_at, &task.Updated_at)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("not found in db: %v", err)
-
-			return nil, err
+			log.Printf("taskID %s not found in db", taskID)
 		} else {
-			return nil, err
+			log.Printf("some error occured: %v", err)
 		}
+
+		return nil, err
 	}
 
 	return task, nil
@@ -82,6 +82,12 @@ func (tr *taskRepositoryImpl) SelectTasks(userID string) ([]entity.Task, error) 
 
 	rows, err := tr.db.Query(req, userID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("no rows on %s", userID)
+		} else {
+			log.Printf("some error occur: %v", err)
+		}
+
 		return nil, err
 	}
 

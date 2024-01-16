@@ -2,10 +2,6 @@ package response
 
 import "time"
 
-type GetTasksResponse struct {
-	tasks []GetTaskResponse
-}
-
 type GetTaskResponse struct {
 	ID          string    `json:"id"`
 	Title       string    `json:"title"`
