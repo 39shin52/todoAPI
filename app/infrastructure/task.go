@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/domain/repository"
@@ -17,9 +18,9 @@ func NewTaskRepository(db *sql.DB) repository.TaskRepository {
 }
 
 func (tr *taskRepositoryImpl) InsertTask(ctx context.Context, task *entity.Task) error {
-	req := `insert into tasks (user_id,task_id,title,description,is_complete) values (?,?,?,?,?)`
+	req := `insert into tasks (id, user_id,title, description, is_complete) values (?,?,?,?,?)`
 
-	if _, err := tr.db.ExecContext(ctx, req, task.UserID, task.ID, task.Title, task.Description, task.IsComplete); err != nil {
+	if _, err := tr.db.ExecContext(ctx, req, task.ID, task.UserID, task.Title, task.Description, task.IsComplete); err != nil {
 		return err
 	}
 
@@ -47,11 +48,17 @@ func (tr *taskRepositoryImpl) DeleteTask(ctx context.Context, task *entity.Task)
 
 func (tr *taskRepositoryImpl) SearchTaskByTaskID(taskID string) (*entity.Task, error) {
 	task := new(entity.Task)
-	req := `select id, user_id, title, descripion, is_complete, created_at, updated_at from tasks where id=?`
+	req := `select id, user_id, title, description, is_complete, created_at, updated_at from tasks where id=?`
 
-	row := tr.db.QueryRow(req, taskID)
-	if err := row.Scan(&task.UserID, &task.ID, &task.Title, &task.Description, &task.IsComplete); err != nil {
-		return nil, err
+	err := tr.db.QueryRow(req, taskID).Scan(&task.ID, &task.UserID, &task.Title, &task.Description, &task.IsComplete, &task.Created_at, &task.Updated_at)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("not found in db: %v", err)
+
+			return nil, err
+		} else {
+			return nil, err
+		}
 	}
 
 	return task, nil
@@ -59,7 +66,7 @@ func (tr *taskRepositoryImpl) SearchTaskByTaskID(taskID string) (*entity.Task, e
 
 func (tr *taskRepositoryImpl) SearchTaskByTitle(title string) (*entity.Task, error) {
 	task := new(entity.Task)
-	req := `select task_id,title,descripion from tasks where title=?`
+	req := `select task_id,title,description from tasks where title=?`
 
 	row := tr.db.QueryRow(req, title)
 	if err := row.Scan(&task.UserID, &task.ID, &task.Title, &task.Description, &task.IsComplete); err != nil {

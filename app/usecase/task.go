@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/domain/repository"
@@ -19,19 +20,24 @@ func NewTaskUsecase(taskRepository repository.TaskRepository, txAdmin *transacti
 	return &TaskUsecase{taskRepository: taskRepository, txAdmin: txAdmin}
 }
 
-func (tu *TaskUsecase) CreateTask(ctx context.Context, r request.CreateTaskRequest, userId string) (string, error) {
+func (tu *TaskUsecase) CreateTask(ctx context.Context, r request.CreateTaskRequest) (string, error) {
 	taskId := uuid.NewString()
 
 	task := &entity.Task{
-		UserID:      userId,
 		ID:          taskId,
+		UserID:      r.UserID,
 		Title:       r.Title,
 		Description: r.Description,
-		IsComplete:  r.IsComplete,
+		IsComplete:  0,
 	}
 
-	if err := tu.taskRepository.InsertTask(ctx, task); err != nil {
-		return "", err
+	if err := tu.txAdmin.Transaction(ctx, func(ctx context.Context) error {
+		if err := tu.taskRepository.InsertTask(ctx, task); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return fmt.Sprintf("faied to create task: %v", err), err
 	}
 
 	return taskId, nil

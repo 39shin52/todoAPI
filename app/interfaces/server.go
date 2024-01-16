@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/39shin52/todoAPI/app/config"
 	"github.com/39shin52/todoAPI/app/domain/repository/transaction"
 	"github.com/39shin52/todoAPI/app/infrastructure"
 	"github.com/39shin52/todoAPI/app/interfaces/handler"
@@ -25,6 +26,14 @@ func NewServer() *Server {
 }
 
 func (s *Server) Init() error {
+	conn, err := config.CreateDBConnection()
+	if err != nil {
+		return err
+	}
+
+	s.db = conn
+	s.Route()
+
 	return nil
 }
 
@@ -37,14 +46,16 @@ func (s *Server) Route() {
 	taskUsecase := usecase.NewTaskUsecase(taskRepository, txAdmin)
 	taskHandler := handler.NewTaskHandler(taskUsecase)
 
-	s.Router.GET("", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, "OK")
+	s.Router.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "OK",
+		})
 	})
 
 	taskGroup := s.Router.Group("/task")
 	taskGroup.GET("", taskHandler.GetTasks)
 	taskGroup.GET("/task_id/:taskID", taskHandler.GetTask)
-	taskGroup.POST("")
+	taskGroup.POST("", taskHandler.CreateTask)
 	taskGroup.PUT("/task_id/:taskID")
 	taskGroup.DELETE("/task_id/:taskID")
 	taskGroup.POST("/task_id/:taskID")

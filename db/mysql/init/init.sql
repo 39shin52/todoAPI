@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     `mail` VARCHAR(32) NOT NULL COMMENT 'メールアドレス',
     `created_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '作成時',
     `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新時',
-    PRIMARY KEY (`user_id`)
+    PRIMARY KEY (`id`)
 );
 
 CREATE TABLE if NOT EXISTS `tasks` (
@@ -26,12 +26,12 @@ CREATE TABLE if NOT EXISTS `tasks` (
     `is_complete` TINYINT(1) NOT NULL COMMENT 'タスク完了判定',
     `created_at`  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '作成時',
     `updated_at` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新時',
-    PRIMARY KEY (`todo_id`)
+    PRIMARY KEY (`id`)
 );
 
-INSERT INTO `user` (`id`,`name`,`password`,`mail`) VALUES ("1","test1","test1","testpass1","testmail1");
-INSERT INTO `user` (`id`,`name`,`password`,`mail`) VALUES ("2","test2","test2","testpass2","testmail2");
+INSERT INTO `user` (`id`,`name`,`password`,`mail`) VALUES ("1","test1","testpass1","testmail1");
+INSERT INTO `user` (`id`,`name`,`password`,`mail`) VALUES ("2","test2","testpass2","testmail2");
 
 INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("1","1","test_tiele1","test_description1",false);
-INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("1","2","test_tiele2","test_description2",false);
-INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("2","1","test_tiele3","test_description3",false);
+INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("2","2","test_tiele2","test_description2",false);
+INSERT INTO `tasks` (`id`,`user_id`,`title`,`description`,`is_complete`) VALUES ("3","1","test_tiele3","test_description3",false);
