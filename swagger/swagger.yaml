@@ -6,32 +6,26 @@ info:
   version: 1.0.0
 
 servers: 
- - url: http://localhost:8080
+ - url: http://localhost:9000
 tags:
- - name: auth
-   description: 認証API
+ - name: task
+   description: タスク関連API
  - name: user
    description: ユーザー情報API
- - name: todo
-   description: タスク情報API
- - name: search
-   description: タスク検索API
 paths: 
-  /user/create:
+  /task:
     post:
       tags:
-        - user
-      summary: ユーザ情報作成API
-      description: |
-        ユーザ情報を作成します。<br>
-        ユーザの名前情報をリクエストで受け取り、ユーザIDと認証用のトークンを生成しデータベースへ保存します。<br>
-        tokenは以降の他のAPIコール時にヘッダに設定をします。
+        - task
+      summary: タスク追加
+      description:
+        タスクを追加API
       requestBody:
         description: Request Body
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreateRequest'
+                $ref: '#/components/schemas/CreateTaskRequest'
         required: true
       responses:
         200:
@@ -39,54 +33,108 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserCreateResponse'
-        400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /user/get:
+                $ref: '#/components/schemas/CreateTaskResponse'
     get:
       tags:
-        - user
-      summary: ユーザ情報取得API
-      description: |
-        ユーザ情報を取得します。
-        「ユーザの認証と特定」の処理はリクエストヘッダの`x-token`を読み取ってデータベースに照会をします。
-      security:
-        - authToken: []
-      responses:
-        200:
-          description: A successful response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserGetResponse'
-  /user/update:
-    put:
-      tags:
-        - user
-      summary: ユーザ情報更新API
-      description: |
-        ユーザ情報の更新する
-      security:
-        - Bearer: []
+        - task
+      summary: タスク一覧取得
+      description:
+        タスク一覧を取得API
       requestBody:
         description: Request Body
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdateRequest'
+                $ref: '#/components/schemas/GetTasksRequest'
         required: true
       responses:
         200:
-          description: A successful response.
-          content: {}
-      x-codegen-request-body-name: body
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTasksResponse'
+  /task/task_id/{taskID}:
+    get:
+      tags:
+        - task
+      summary: タスク取得
+      description: タスク取得API
+      parameters:
+        - $ref: '#/components/parameters/taskID'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetTaskResponse'
+
+components:
+  schemas:
+    CreateTaskRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "1"
+          description: ユーザーID
+        title:
+          type: string
+          example: "掃除"
+          description: タスクのタイトル
+        description:
+          type: string
+          example: "掃除機をかける"
+          description: タスクの概要
+    CreateTaskResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+          example: "0e8aeae4-0548-4929-9a70-69d216c70811"
+          description: 保存されたタスクのID
+    GetTasksRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "1"
+    GetTasksResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/GetTaskResponse'
+    GetTaskResponse:
+      type: object
+      properties:
+        task_id:
+          type: string
+          example: "0e8aeae4-0548-4929-9a70-69d216c70811"
+          description: タスクID
+        title:
+          type: string
+          example: "掃除"
+          description: タスクのタイトル
+        description:
+          type: string
+          example: "掃除機をかける"
+          description: タスクの概要
+        created_at:
+          type: string
+          description: タスク作成時間
+          format: date-time
+        updated_at:
+          type: string
+          description: タスク更新時間
+          format: date-time
+  parameters:
+    taskID:
+      name: taskID
+      in: path
+      required: true
+      description: taskID
+      schema:
+        type: string

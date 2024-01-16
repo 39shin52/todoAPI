@@ -58,6 +58,4 @@ func (s *Server) Route() {
 	taskGroup.POST("", taskHandler.CreateTask)
 	taskGroup.PUT("/task_id/:taskID")
 	taskGroup.DELETE("/task_id/:taskID")
-	taskGroup.POST("/task_id/:taskID")
-
 }
