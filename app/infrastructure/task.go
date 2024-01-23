@@ -28,9 +28,9 @@ func (tr *taskRepositoryImpl) InsertTask(ctx context.Context, task *entity.Task)
 }
 
 func (tr *taskRepositoryImpl) UpdateTask(ctx context.Context, task *entity.Task) error {
-	req := `update`
+	req := `update tasks set title=?, description=?, is_complete=?, updated_at=? where id=?`
 
-	if _, err := tr.db.ExecContext(ctx, req); err != nil {
+	if _, err := tr.db.ExecContext(ctx, req, task.Title, task.Description, task.IsComplete, task.Updated_at, task.ID); err != nil {
 		return err
 	}
 

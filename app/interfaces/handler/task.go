@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
+	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/interfaces/request"
 	"github.com/39shin52/todoAPI/app/interfaces/response"
 	"github.com/39shin52/todoAPI/app/usecase"
@@ -21,17 +21,13 @@ func NewTaskHandler(taskUsecase *usecase.TaskUsecase) *TaskHandler {
 func (th *TaskHandler) CreateTask(c *gin.Context) {
 	var task request.CreateTaskRequest
 	if err := c.BindJSON(&task); err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 	}
 
-	fmt.Println("task", task)
-
 	response, err := th.taskUsecase.CreateTask(c.Request.Context(), task)
 	if err != nil {
-		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
@@ -97,4 +93,29 @@ func (th *TaskHandler) GetTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"response": taskResponse,
 	})
+}
+
+func (th *TaskHandler) UpdateTask(c *gin.Context) {
+	taskID := c.Param("taskID")
+	var reqTask request.UpdateTaskRequest
+	if err := c.Bind(&reqTask); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	newTask := &entity.Task{
+		Title:       reqTask.Title,
+		Description: reqTask.Description,
+		IsComplete:  reqTask.IsComplete,
+	}
+
+	if err := th.taskUsecase.UpdateTask(c, taskID, newTask); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, "Success")
+
 }

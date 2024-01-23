@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/domain/repository"
@@ -74,14 +75,30 @@ func (tu *TaskUsecase) DeleteTask(ctx context.Context, taskID string) error {
 	return nil
 }
 
-func (tu *TaskUsecase) UpdateTask(ctx context.Context, taskID string) error {
-	task, err := tu.taskRepository.SearchTaskByTaskID(taskID)
+func (tu *TaskUsecase) UpdateTask(ctx context.Context, taskID string, task *entity.Task) error {
+	newTask, err := tu.taskRepository.SearchTaskByTaskID(taskID)
 	if err != nil {
 		return err
 	}
 
-	if err = tu.taskRepository.UpdateTask(ctx, task); err != nil {
-		return err
+	if task.Title != "" {
+		newTask.Title = task.Title
+	}
+	if task.Description != "" {
+		newTask.Description = task.Description
+	}
+	if newTask.IsComplete != task.IsComplete {
+		newTask.IsComplete = task.IsComplete
+	}
+	newTask.Updated_at = time.Now()
+
+	if err := tu.txAdmin.Transaction(ctx, func(ctx context.Context) error {
+		if err := tu.taskRepository.UpdateTask(ctx, newTask); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return fmt.Errorf("failed to update task: %v", err)
 	}
 
 	return nil
