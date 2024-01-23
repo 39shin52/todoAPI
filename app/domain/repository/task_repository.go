@@ -9,7 +9,7 @@ import (
 type TaskRepository interface {
 	InsertTask(context.Context, *entity.Task) error
 	UpdateTask(context.Context, *entity.Task) error
-	DeleteTask(context.Context, *entity.Task) error
+	DeleteTask(context.Context, string) error
 	SearchTaskByTaskID(string) (*entity.Task, error)
 	SearchTaskByTitle(string) (*entity.Task, error)
 	SelectTasks(string) ([]entity.Task, error)

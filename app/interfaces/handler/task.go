@@ -117,5 +117,16 @@ func (th *TaskHandler) UpdateTask(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, "Success")
+}
 
+func (th *TaskHandler) DeleteTask(c *gin.Context) {
+	taskID := c.Param("taskID")
+
+	if err := th.taskUsecase.DeleteTask(c, taskID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, "Success")
 }
