@@ -63,13 +63,18 @@ func (tu *TaskUsecase) ReadTask(taskID string) (*entity.Task, error) {
 }
 
 func (tu *TaskUsecase) DeleteTask(ctx context.Context, taskID string) error {
-	task, err := tu.taskRepository.SearchTaskByTaskID(taskID)
+	_, err := tu.taskRepository.SearchTaskByTaskID(taskID)
 	if err != nil {
 		return err
 	}
 
-	if err = tu.taskRepository.DeleteTask(ctx, task); err != nil {
-		return err
+	if err := tu.txAdmin.Transaction(ctx, func(ctx context.Context) error {
+		if err := tu.taskRepository.DeleteTask(ctx, taskID); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return fmt.Errorf("failed to delete task: %v", err)
 	}
 
 	return nil

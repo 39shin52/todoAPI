@@ -37,10 +37,10 @@ func (tr *taskRepositoryImpl) UpdateTask(ctx context.Context, task *entity.Task)
 	return nil
 }
 
-func (tr *taskRepositoryImpl) DeleteTask(ctx context.Context, task *entity.Task) error {
-	req := `delete`
+func (tr *taskRepositoryImpl) DeleteTask(ctx context.Context, taskID string) error {
+	req := `delete from tasks where id=?`
 
-	if _, err := tr.db.ExecContext(ctx, req); err != nil {
+	if _, err := tr.db.ExecContext(ctx, req, taskID); err != nil {
 		return err
 	}
 	return nil
