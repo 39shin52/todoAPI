@@ -27,13 +27,13 @@ services:
     # networks:
     #   - app
     environment:
+      MYSQL_ROOT_HOST: '%'
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_DATABASE: 'todo'
       MYSQL_PASSWORD: 'password'
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
       - ./db/mysql/init:/docker-entrypoint-initdb.d
-      - ./db/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - db-data:/var/lib/mysql
 
   # swagger-ui:

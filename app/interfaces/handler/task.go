@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/39shin52/todoAPI/app/interfaces/request"
@@ -17,13 +18,40 @@ func NewTaskHandler(taskUsecase *usecase.TaskUsecase) *TaskHandler {
 	return &TaskHandler{taskUsecase: taskUsecase}
 }
 
+func (th *TaskHandler) CreateTask(c *gin.Context) {
+	var task request.CreateTaskRequest
+	if err := c.BindJSON(&task); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	fmt.Println("task", task)
+
+	response, err := th.taskUsecase.CreateTask(c.Request.Context(), task)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"task_id": response,
+	})
+
+}
+
 func (th *TaskHandler) GetTasks(c *gin.Context) {
 	var user request.GetTasksRequest
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
 	}
 
-	tasks, err := th.taskUsecase.ReadTasks(user.ID)
+	tasks, err := th.taskUsecase.ReadTasks(user.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 	}
@@ -32,7 +60,6 @@ func (th *TaskHandler) GetTasks(c *gin.Context) {
 	for _, t := range tasks {
 		newTaskResponse := response.GetTaskResponse{
 			ID:          t.ID,
-			UserID:      t.UserID,
 			Title:       t.Title,
 			Description: t.Description,
 			IsComplete:  t.IsComplete,
@@ -43,7 +70,9 @@ func (th *TaskHandler) GetTasks(c *gin.Context) {
 		tasksResponse = append(tasksResponse, newTaskResponse)
 	}
 
-	c.JSON(http.StatusOK, tasksResponse)
+	c.JSON(http.StatusOK, gin.H{
+		"response": tasksResponse,
+	})
 }
 
 func (th *TaskHandler) GetTask(c *gin.Context) {
@@ -51,12 +80,13 @@ func (th *TaskHandler) GetTask(c *gin.Context) {
 
 	task, err := th.taskUsecase.ReadTask(taskID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
 	}
 
 	taskResponse := response.GetTaskResponse{
 		ID:          task.ID,
-		UserID:      task.UserID,
 		Title:       task.Title,
 		Description: task.Description,
 		IsComplete:  task.IsComplete,
@@ -64,5 +94,7 @@ func (th *TaskHandler) GetTask(c *gin.Context) {
 		Updated_at:  task.Updated_at,
 	}
 
-	c.JSON(http.StatusOK, taskResponse)
+	c.JSON(http.StatusOK, gin.H{
+		"response": taskResponse,
+	})
 }
