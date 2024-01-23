@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
@@ -101,5 +102,15 @@ func (tr *taskRepositoryImpl) SelectTasks(userID string) ([]entity.Task, error) 
 	}
 
 	return tasks, nil
+}
 
+func (tr *taskRepositoryImpl) DuplicateTask(task *entity.Task) error {
+	fmt.Printf("infra task: %#v\n", task)
+	req := `insert into tasks (id, user_id,title, description, is_complete, updated_at, created_at) values (?,?,?,?,?,?,?)`
+
+	if _, err := tr.db.Exec(req, task.ID, task.UserID, task.Title, task.Description, task.IsComplete, task.Updated_at, task.Created_at); err != nil {
+		return err
+	}
+
+	return nil
 }

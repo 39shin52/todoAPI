@@ -108,3 +108,23 @@ func (tu *TaskUsecase) UpdateTask(ctx context.Context, taskID string, task *enti
 
 	return nil
 }
+
+func (tu *TaskUsecase) DuplicateTask(taskID string) error {
+	newTaskID := uuid.NewString()
+	task, err := tu.taskRepository.SearchTaskByTaskID(taskID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("usecase task: %#v\n", task)
+
+	task.ID = newTaskID
+	task.Created_at = time.Now()
+	task.Updated_at = time.Now()
+
+	if err = tu.taskRepository.DuplicateTask(task); err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -24,6 +24,8 @@ func (th *TaskHandler) CreateTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	response, err := th.taskUsecase.CreateTask(c.Request.Context(), task)
@@ -31,6 +33,8 @@ func (th *TaskHandler) CreateTask(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -45,11 +49,15 @@ func (th *TaskHandler) GetTasks(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	tasks, err := th.taskUsecase.ReadTasks(user.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
+
+		return
 	}
 
 	tasksResponse := make([]response.GetTaskResponse, 0)
@@ -79,6 +87,8 @@ func (th *TaskHandler) GetTask(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	taskResponse := response.GetTaskResponse{
@@ -102,6 +112,8 @@ func (th *TaskHandler) UpdateTask(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	newTask := &entity.Task{
@@ -114,6 +126,8 @@ func (th *TaskHandler) UpdateTask(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+
+		return
 	}
 
 	c.JSON(http.StatusOK, "Success")
@@ -126,6 +140,22 @@ func (th *TaskHandler) DeleteTask(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, "Success")
+}
+
+func (th *TaskHandler) DuplicateTask(c *gin.Context) {
+	taskID := c.Param("taskID")
+
+	if err := th.taskUsecase.DuplicateTask(taskID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+
+		return
 	}
 
 	c.JSON(http.StatusOK, "Success")

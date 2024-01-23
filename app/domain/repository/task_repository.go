@@ -13,4 +13,5 @@ type TaskRepository interface {
 	SearchTaskByTaskID(string) (*entity.Task, error)
 	SearchTaskByTitle(string) (*entity.Task, error)
 	SelectTasks(string) ([]entity.Task, error)
+	DuplicateTask(*entity.Task) error
 }
