@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/domain/repository"
@@ -18,10 +19,17 @@ func NewUserRepository(db *sql.DB, t transaction.TxAdmin) repository.UserReposit
 }
 
 func (ur *userRepositoryImpl) SelectUser(name string) (*entity.User, error) {
+	req := "select user_id, user_name, mail, work from user where user_name = ?"
 	user := new(entity.User)
 
-	row := ur.db.QueryRow("SELECT user_id, user_name, mail, work from user where user_name=?", name)
-	if err := row.Scan(&user.ID, &user.UserName, &user.Mail, &user.Work); err != nil {
+	err := ur.db.QueryRow(req, name).Scan(&user.ID, &user.UserName, &user.Mail, &user.Work)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("user's name %s  is not found in db", name)
+		} else {
+			log.Printf("some error occured: %v", err)
+		}
+
 		return nil, err
 	}
 
