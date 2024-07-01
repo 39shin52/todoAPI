@@ -48,17 +48,6 @@ services:
   #     - 8002:8080
   #   volumes:
   #     - ./swagger/:/swagger
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    environment:
-      PMA_ARBITRARY: 1
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: "admin"
-    ports:
-      - "127.0.0.1:4000:80"
-    links:
-      - mysql
 
 volumes:
   db-data:
