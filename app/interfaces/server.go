@@ -46,6 +46,10 @@ func (s *Server) Route() {
 	taskUsecase := usecase.NewTaskUsecase(taskRepository, txAdmin)
 	taskHandler := handler.NewTaskHandler(taskUsecase)
 
+	userRepository := infrastructure.NewUserRepository(s.db)
+	userUsecase := usecase.NewUserUsecase(userRepository, txAdmin)
+	userHandler := handler.NewUserHandler(userUsecase)
+
 	s.Router.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "OK",
@@ -59,4 +63,8 @@ func (s *Server) Route() {
 	taskGroup.PUT("/task_id/:taskID", taskHandler.UpdateTask)
 	taskGroup.DELETE("/task_id/:taskID", taskHandler.DeleteTask)
 	taskGroup.POST("/task_id/:taskID", taskHandler.DuplicateTask)
+
+	userGroup := s.Router.Group("/user")
+	userGroup.GET("", userHandler.GetUser)
+	s.Router.GET("/users", userHandler.GetUsers)
 }

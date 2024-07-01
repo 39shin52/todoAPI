@@ -5,23 +5,35 @@ import (
 
 	"github.com/39shin52/todoAPI/app/domain/entity"
 	"github.com/39shin52/todoAPI/app/domain/repository"
+	"github.com/39shin52/todoAPI/app/domain/repository/transaction"
 )
 
 type UserUsecase struct {
+	txAdmin        *transaction.TxAdmin
 	userRepository repository.UserRepository
 }
 
 // contextはinterfaceで宣言します
-func NewUserRepository(userRepository repository.UserRepository) *UserUsecase {
-	return &UserUsecase{userRepository: userRepository}
+func NewUserUsecase(userRepository repository.UserRepository, txAdmin *transaction.TxAdmin) *UserUsecase {
+	return &UserUsecase{userRepository: userRepository, txAdmin: txAdmin}
 }
 
 func (uu *UserUsecase) SelectUser(name string) (*entity.User, error) {
-	return uu.userRepository.SelectUser(name)
+	user, err := uu.userRepository.SelectUser(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (uu *UserUsecase) SelectUsers() ([]entity.User, error) {
-	return uu.userRepository.SelectUsers()
+	users, err := uu.userRepository.SelectUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (uu *UserUsecase) UpdateUser(ctx context.Context, user entity.User) error {
