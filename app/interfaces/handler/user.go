@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/39shin52/todoAPI/app/domain/entity"
+	"github.com/39shin52/todoAPI/app/interfaces/response"
 	"github.com/39shin52/todoAPI/app/usecase"
 	"github.com/gin-gonic/gin"
 )
@@ -18,24 +18,19 @@ func NewUserHandler(userUsecase *usecase.UserUsecase) *UserHandler {
 	return &UserHandler{userUsecase: userUsecase}
 }
 
-func (uh UserHandler) GetUser(c *gin.Context) {
-	var userName string
-	if err := c.Bind(&userName); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+func (uh *UserHandler) GetUser(c *gin.Context) {
+	userName := c.Query("userName")
+
+	user, err := uh.userUsecase.SelectUser(userName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 
 		return
 	}
 
-	user, err := uh.userUsecase.SelectUser(userName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-
-		return
-	}
-
-	userResponse := entity.User{
+	userResponse := response.SelectUserResponse{
 		ID:   user.ID,
 		Mail: user.Mail,
 		Work: user.Work,
@@ -43,5 +38,20 @@ func (uh UserHandler) GetUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"response": userResponse,
+	})
+}
+
+func (uh *UserHandler) GetUsers(c *gin.Context) {
+	users, err := uh.userUsecase.SelectUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"response": response.UsersResponse(users),
 	})
 }
